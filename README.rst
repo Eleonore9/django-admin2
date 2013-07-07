@@ -5,27 +5,43 @@ django-admin2
 .. image:: https://travis-ci.org/pydanny/django-admin2.png
    :alt: Build Status
    :target: https://travis-ci.org/pydanny/django-admin2
+.. image:: https://coveralls.io/repos/twoscoops/django-admin2/badge.png
+   :alt: Coverage Status
+   :target: https://coveralls.io/r/twoscoops/django-admin2
+.. image:: https://pypip.in/v/django-admin2/badge.png
+   :target: https://crate.io/packages/django-admin2/
+.. image:: https://pypip.in/d/django-admin2/badge.png
+   :target: https://crate.io/packages/django-admin2/
 
-**Warning:** This project is currently in an **alpha** state and currently not meant for real projects.
+One of the most useful parts of ``django.contrib.admin`` is the ability to
+configure various views that touch and alter data. django-admin2 is a complete
+rewrite of that library using modern Class-Based Views and enjoying a design
+focused on extendibility and adaptability. By starting over, we can avoid the
+legacy code and make it easier to write extensions and themes.
 
-One of the most useful parts of ``django.contrib.admin`` is the ability to configure various views that touch and alter data. django-admin2 is a complete rewrite of that library using modern Class-Based Views and enjoying a design focused on extendibility and adaptability. By starting over, we can avoid the legacy code and make it easier to write extensions and themes.
-
-Contributing
-=============
-
-Yes please! Please read our formal contributing document at: https://django-admin2.readthedocs.org/en/latest/contributing.html
+Documentation: http://django-admin2.rtfd.org/
 
 Features
-========
+=============
 
-* Easy-to-extend API that follows similar patterns to ``django.contrib.admin``.
-* Built-in RESTFUL API powered by ``django-rest-framework``.
-* Default theme built on Twitter Bootstrap that is just starting to act like the current Django admin.
-* Easy to implement theme system.
-* Permission controls
-* Custom actions
-* Add/Change form inlines
-* i18n
+* Rewrite of the Django Admin backend
+* Drop-in themes
+* Built-in RESTful API
+
+Screenshots
+===========
+
+.. image:: screenshots/Site_administration.png
+    :width: 722px
+    :alt: Site administration
+    :align: center
+    :target: screenshots/Site_administration.png
+
+.. image:: screenshots/Select_user.png
+    :width: 722px
+    :alt: Select user
+    :align: center
+    :target: screenshots/Select_user.png
 
 
 Requirements
@@ -33,29 +49,75 @@ Requirements
 
 * Django 1.5+
 * Python 2.7+ or Python 3.3+
-* django-braces
-* django-extra-views
-* django-floppyforms
-* django-rest-framework
-* Sphinx (for documentation)
+* django-braces_
+* django-extra-views_
+* django-floppyforms_
+* django-rest-framework_
+* Sphinx_ (for documentation)
 
-Basic Pattern
-==============
+.. _django-braces: https://github.com/brack3t/django-braces
+.. _django-extra-views: https://github.com/AndrewIngram/django-extra-views
+.. _django-floppyforms: https://github.com/brutasse/django-floppyforms
+.. _django-rest-framework: https://github.com/tomchristie/django-rest-framework
+.. _Sphinx: http://sphinx-doc.org/
 
-Our goal is to make this API work:
+
+
+Installation
+============
+
+Use pip to install from PyPI:
+
+.. code-block:: python
+
+   pip install django-admin2
+
+Add djadmin2 and rest_framework to your settings file:
+
+.. code-block:: python
+
+   INSTALLED_APPS = (
+      ...
+      'djadmin2',
+      'rest_framework', # for the browsable API templates
+      ...
+   )
+
+Add djadmin2 urls to your URLconf:
+
+.. code-block:: python
+
+   # urls.py
+   from django.conf.urls import patterns, include
+
+   import djadmin2
+
+   djadmin2.default.autodiscover()
+
+
+   urlpatterns = patterns(
+      ...
+      url(r'^admin2/', include(djadmin2.default.urls)),
+   )
+
+
+How to write django-admin2 modules
+=====================================
 
 .. code-block:: python
 
   # myapp/admin2.py
   # Import your custom models
-  from .models import Post, Comment
   from django.contrib.auth.forms import UserCreationForm, UserChangeForm
   from django.contrib.auth.models import User
+
+  from .models import Post, Comment
 
   import djadmin2
 
 
   class UserAdmin2(djadmin2.ModelAdmin2):
+      # Replicates the traditional admin for django.contrib.auth.models.User
       create_form_class = UserCreationForm
       update_form_class = UserChangeForm
 
@@ -66,24 +128,58 @@ Our goal is to make this API work:
   djadmin2.default.register(User, UserAdmin2)
 
 
-Themes
-========
+Drop-In Themes
+===============
 
 The default theme is whatever bootstrap is most current. Specifically:
 
 .. code-block:: python
 
-    ADMIN2_THEME_DIRECTORY = "admin2/bootstrap/"
+    # settings.py
+    ADMIN2_THEME_DIRECTORY = "djadmin2/bootstrap/"
 
-If you create a new theme, please define it thus:
+If you create a new theme, you define it thus:
 
 .. code-block:: python
 
-    ADMIN2_THEME_DIRECTORY = "admin2/foundation/"
+    # settings.py
+    ADMIN2_THEME_DIRECTORY = "djadmin2/foundation/"
+
 
 
 History
 =========
+
+0.5.0 (pending)
+
+  * Implemented customizable value renderers
+  * Implemented list filters using django-filters. Greatly supersedes what Django provides.
+  * Implemented ModelAdmin2.save_on_top and ModelAdmin2.save_on_bottom
+  * Implemented BooleanField icons for List and Detail views
+  * Implemented default ``django.contrib.auth`` and ``django.contrib.sites`` registrations
+  * Implemented the displayed of verbose field/method names in list view
+  * Improved internal test coverage
+  * Corrected early nomenclature decisions
+  * Completed Internationalization
+  * Added django-admin2 to Transifex
+  * Translations for Catalan, Chinese, Sp
+
+0.4.0 (2013-06-30)
+
+  * Implemented both Function- and Class-based Action views
+  * Implemented ModelAdmin2.list_display
+  * Implemented ModelAdmin2.fieldsets
+  * Dropdown widget now displays the selected choice
+  * Added support for callables in ModelAdmin2.list_display
+  * Added screenshots to README
+  * Added second example project
+  * Fixed breadcrumbs
+  * Default theme: Proper closing of template and media blocks
+  * Default theme: Standardized indentation in default theme templates
+  * Default theme: Pointed to CDN for JQuery
+  * Default theme: Added basic style for login form
+  * Default theme: Internationalized all text strings
+
 
 0.3.0 (2013-05-31)
 

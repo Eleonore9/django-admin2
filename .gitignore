@@ -42,7 +42,6 @@ coverage
 
 # Sphinx
 docs/_build
-docs/_static
 
 # Launchpad
 lp-cache
@@ -53,3 +52,10 @@ logfile
 
 # SQLite
 *.db
+
+# vim swap files
+*.sw[o-z]
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project

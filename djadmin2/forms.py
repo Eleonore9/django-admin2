@@ -1,8 +1,11 @@
-from __future__ import unicode_literals
+# -*- coding: utf-8 -*-
+from __future__ import division, absolute_import, unicode_literals
+
 from copy import deepcopy
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 import django.forms
 import django.forms.models
 import django.forms.extras.widgets
@@ -21,10 +24,10 @@ _WIDGET_COMMON_ARGUMENTS = ('attrs',)
 
 
 def _copy_attributes(original, new_widget, attributes):
-        for attr in attributes:
-            original_value = getattr(original, attr)
-            original_value = deepcopy(original_value)
-            setattr(new_widget, attr, original_value)
+    for attr in attributes:
+        original_value = getattr(original, attr)
+        original_value = deepcopy(original_value)
+        setattr(new_widget, attr, original_value)
 
 
 def _create_widget(widget_class, copy_attributes=(), init_arguments=()):
@@ -54,7 +57,7 @@ def _create_radioselect(original):
         return original
     create_new_widget = _create_widget(
         floppyforms.widgets.RadioSelect,
-        ('allow_multiple_selected',))
+        ('choices', 'allow_multiple_selected',))
     return create_new_widget(original)
 
 
@@ -128,19 +131,21 @@ _django_to_floppyforms_widget = {
     django.forms.widgets.Select:
         _create_widget(
             floppyforms.widgets.Select,
-            ('allow_multiple_selected',)),
+            ('choices', 'allow_multiple_selected',)),
     django.forms.widgets.NullBooleanSelect:
         _create_widget(
             floppyforms.widgets.NullBooleanSelect,
-            ('allow_multiple_selected',)),
+            ('choices', 'allow_multiple_selected',)),
     django.forms.widgets.SelectMultiple:
         _create_widget(
             floppyforms.widgets.SelectMultiple,
-            ('allow_multiple_selected',)),
+            ('choices', 'allow_multiple_selected',)),
     django.forms.widgets.RadioSelect:
         _create_radioselect,
     django.forms.widgets.CheckboxSelectMultiple:
-        _create_widget(floppyforms.widgets.CheckboxSelectMultiple),
+        _create_widget(
+            floppyforms.widgets.CheckboxSelectMultiple,
+            ('choices', 'allow_multiple_selected',)),
     django.forms.widgets.MultiWidget:
         _create_widget(
             floppyforms.widgets.MultiWidget,
@@ -221,7 +226,7 @@ def floppify_form(form_class):
 
 
 def modelform_factory(model, form=django.forms.models.ModelForm, fields=None,
-                      exclude=None, formfield_callback=None,  widgets=None):
+                      exclude=None, formfield_callback=None, widgets=None):
     form_class = django.forms.models.modelform_factory(
         model=model,
         form=form,
@@ -232,6 +237,8 @@ def modelform_factory(model, form=django.forms.models.ModelForm, fields=None,
     return floppify_form(form_class)
 
 
+# Translators : %(username)s will be replaced by the username_field name
+# (default : username, but could be email, or something else)
 ERROR_MESSAGE = ugettext_lazy("Please enter the correct %(username)s and password "
         "for a staff account. Note that both fields may be case-sensitive.")
 
@@ -242,8 +249,11 @@ class AdminAuthenticationForm(AuthenticationForm):
     Liberally copied from django.contrib.admin.forms.AdminAuthenticationForm
 
     """
-    this_is_the_login_form = django.forms.BooleanField(widget=floppyforms.HiddenInput, initial=1,
-        error_messages={'required': ugettext_lazy("Please log in again, because your session has expired.")})
+    error_messages = {
+        'required': ugettext_lazy("Please log in again, because your session has expired."),
+    }
+    this_is_the_login_form = django.forms.BooleanField(widget=floppyforms.HiddenInput,
+            initial=1, error_messages=error_messages)
 
     def clean(self):
         username = self.cleaned_data.get('username')
@@ -261,3 +271,7 @@ class AdminAuthenticationForm(AuthenticationForm):
                     'username': self.username_field.verbose_name
                 })
         return self.cleaned_data
+
+
+UserCreationForm = floppify_form(UserCreationForm)
+UserChangeForm = floppify_form(UserChangeForm)

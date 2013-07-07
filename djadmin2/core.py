@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-:
 """
 WARNING: This file about to undergo major refactoring by @pydanny per Issue #99.
 """
+from __future__ import division, absolute_import, unicode_literals
 
 from django.conf.urls import patterns, include, url
 from django.conf import settings
@@ -124,7 +126,7 @@ class Admin2(object):
             url(regex=r'^$',
                 view=self.index_view.as_view(**self.get_index_kwargs()),
                 name='dashboard'
-            ),
+                ),
             url(regex='^auth/user/(?P<pk>\d+)/update/password/$',
                 view=views.PasswordChangeView.as_view(),
                 name='password_change'
@@ -137,16 +139,14 @@ class Admin2(object):
                 view=views.LogoutView.as_view(),
                 name='logout'
                 ),
-            url(
-                regex=r'^(?P<app_label>\w+)/$',
+            url(regex=r'^(?P<app_label>\w+)/$',
                 view=self.app_index_view.as_view(**self.get_app_index_kwargs()),
                 name='app_index'
-            ),
-            url(
-                regex=r'^api/v0/$',
+                ),
+            url(regex=r'^api/v0/$',
                 view=self.api_index_view.as_view(**self.get_api_index_kwargs()),
                 name='api_index'
-            ),
+                ),
         )
 
         for model, model_admin in self.registry.iteritems():

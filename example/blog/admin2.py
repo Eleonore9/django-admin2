@@ -1,55 +1,45 @@
-
-# Import your custom models
-from .models import Post, Comment
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from django.contrib.auth.models import Group, User
-from rest_framework.relations import PrimaryKeyRelatedField
+# -*- coding: utf-8 -*-
+from __future__ import division, absolute_import, unicode_literals
+from django.contrib import messages
+from django.utils.translation import ugettext_lazy
 
 import djadmin2
-from djadmin2.forms import floppify_form
-from djadmin2.apiviews import Admin2APISerializer
+from djadmin2 import renderers
+from djadmin2.actions import DeleteSelectedAction
 
-
-UserCreationForm = floppify_form(UserCreationForm)
-UserChangeForm = floppify_form(UserChangeForm)
-
-
-class GroupSerializer(Admin2APISerializer):
-    permissions = PrimaryKeyRelatedField(many=True)
-
-    class Meta:
-        model = Group
-
-
-class GroupAdmin2(djadmin2.ModelAdmin2):
-    api_serializer_class = GroupSerializer
-
-
-class UserSerializer(Admin2APISerializer):
-    user_permissions = PrimaryKeyRelatedField(many=True)
-
-    class Meta:
-        model = User
-        exclude = ('passwords',)
+# Import your custom models
+from .actions import CustomPublishAction
+from .models import Post, Comment
 
 
 class CommentInline(djadmin2.Admin2Inline):
     model = Comment
 
 
+def unpublish_items(request, queryset):
+    queryset.update(published=False)
+    messages.add_message(request, messages.INFO, ugettext_lazy(u'Items unpublished'))
+
+# Translators : action description
+unpublish_items.description = ugettext_lazy('Unpublish selected items')
+
+
 class PostAdmin(djadmin2.ModelAdmin2):
+    list_actions = [DeleteSelectedAction, CustomPublishAction, unpublish_items]
     inlines = [CommentInline]
+    search_fields = ('title', '^body')
+    list_display = ('title', 'body', 'published')
+    field_renderers = {
+        'title': renderers.title_renderer,
+    }
 
 
-class UserAdmin2(djadmin2.ModelAdmin2):
-    create_form_class = UserCreationForm
-    update_form_class = UserChangeForm
-
-    api_serializer_class = UserSerializer
+class CommentAdmin(djadmin2.ModelAdmin2):
+    search_fields = ('body', '=post__title')
+    list_filter = ['post', ]
 
 
 #  Register each model with the admin
 djadmin2.default.register(Post, PostAdmin)
-djadmin2.default.register(Comment)
-djadmin2.default.register(User, UserAdmin2)
-djadmin2.default.register(Group, GroupAdmin2)
+djadmin2.default.register(Comment, CommentAdmin)
+

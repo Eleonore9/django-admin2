@@ -82,7 +82,7 @@ setup(
     keywords='django,admin',
     author=author,
     author_email='pydanny@gmail.com',
-    url='http://github.com/pydanny/django-admin2',
+    url='http://djangoadmin.org',
     license='MIT',
     packages=get_packages('djadmin2'),
     include_package_data=True,
@@ -92,7 +92,8 @@ setup(
         'django-braces==1.0.0',
         'django-extra-views==0.6.2',
         'djangorestframework==2.3.3',
-        'django-floppyforms==1.1'
+        'django-floppyforms==1.1',
+        'django-crispy-forms==1.3.2'
         ],
     zip_safe=False,
 )
