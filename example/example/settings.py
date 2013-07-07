@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'django_coverage',
     'floppyforms',
+    'crispy_forms',
     'rest_framework',
     'djadmin2',
     'blog',
